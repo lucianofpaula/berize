@@ -1,0 +1,145 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 1. USUÁRIO GLOBAL E CONTROLE DE ACESSO
+// ==========================================
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  whatsapp      String?
+  password      String? // Hash da senha (para login tradicional)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relações de Autenticação
+  accounts Account[]
+  sessions Session[]
+
+  // Relação com as empresas (Tenants) que ele participa
+  tenantMembers     TenantMember[]
+  referredCompanies Company[]      @relation("CompanyReferrer")
+  // Empresas que este usuário é dono (reivindicadas)
+  ownedCompanies    Company[]      @relation("CompanyOwner")
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// ==========================================
+// 2. ESTRUTURA DE TENANTS (EMPRESAS)
+// ==========================================
+
+model Company {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  slug      String        @unique // Ex: "barbeariadocanhoto"
+  status    CompanyStatus @default(CLAIMABLE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  // --- CAMPOS DE INDICAÇÃO E PROPRIEDADE ---
+
+  // ID do usuário que indicou esta empresa (opcional)
+  referredById String? @db.ObjectId
+  // ID do usuário que é o dono real e reivindicou a empresa (opcional)
+  ownerId      String? @db.ObjectId
+
+  // Relações com o Prisma (mapeando os caminhos acima)
+  referredBy User?          @relation("CompanyReferrer", fields: [referredById], references: [id], onDelete: SetNull)
+  owner      User?          @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  // Relação com os membros/clientes desta empresa
+  members    TenantMember[]
+
+  @@map("companies")
+}
+
+// ==========================================
+// 3. O PULO DO GATO: RELAÇÃO MULTI-TENANT E MMN
+// ==========================================
+
+model TenantMember {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Vínculos obrigatórios
+  userId    String @db.ObjectId
+  companyId String @db.ObjectId
+
+  // Dados financeiros e de fidelidade específicos desta empresa
+  loyaltyPoints     Int   @default(0)
+  commissionBalance Float @default(0.0)
+
+  // --- ESTRUTURA DO MARKETING MULTINÍVEL (MMN) ---
+
+  // ID do patrocinador direto (é outro TenantMember desta mesma empresa)
+  sponsorId String? @db.ObjectId
+
+  // Caminho materializado: Array com os IDs de todos os ancestrais na rede desta empresa
+  // No Prisma com MongoDB, definimos arrays de String representados por ObjectIds assim:
+  ancestors String[] @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações mapeadas no Prisma
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Relação interna para achar o patrocinador direto dentro da mesma coleção
+  sponsor   TenantMember?  @relation("Sponsorship", fields: [sponsorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sponsored TenantMember[] @relation("Sponsorship")
+
+  // Evita que o mesmo usuário se vincule mais de uma vez à mesma empresa
+  @@unique([userId, companyId])
+  // Índice para buscas rápidas de árvore por empresa
+  @@index([companyId, ancestors])
+  @@map("tenant_members")
+}
+
+// ==========================================
+// ENUNS
+// ==========================================
+enum CompanyStatus {
+  ACTIVE // Empresa ativa, mensalidade em dia, site funcionando
+  BLOCKED // Bloqueada por falta de pagamento (exibe tela de aviso)
+  INACTIVE // Desativada pelo próprio dono
+  CLAIMABLE // Cadastrada por um usuário comum, aguardando o dono real reivindicar
+}
