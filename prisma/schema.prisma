@@ -76,6 +76,7 @@ model Company {
   status    CompanyStatus @default(CLAIMABLE)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+  logo          String? // URL da logo da empresa
   // --- CAMPOS DE INDICAÇÃO E PROPRIEDADE ---
 
   // ID do usuário que indicou esta empresa (opcional)
