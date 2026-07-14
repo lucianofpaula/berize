@@ -89,6 +89,9 @@ model Company {
   owner      User?          @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   // Relação com os membros/clientes desta empresa
   members    TenantMember[]
+  // Planos e serviços da empresa
+  plans      Plan[]
+  services   Service[]
 
   @@map("companies")
 }
@@ -104,9 +107,15 @@ model TenantMember {
   userId    String @db.ObjectId
   companyId String @db.ObjectId
 
+  // Papel do usuário dentro da empresa
+  role TenantRole @default(CLIENT)
+
   // Dados financeiros e de fidelidade específicos desta empresa
   loyaltyPoints     Int   @default(0)
   commissionBalance Float @default(0.0)
+
+  // Perfil de barbeiro (apenas se role = BARBER)
+  barberProfile BarberProfile?
 
   // --- ESTRUTURA DO MARKETING MULTINÍVEL (MMN) ---
 
@@ -136,8 +145,109 @@ model TenantMember {
 }
 
 // ==========================================
+// 4. PERFIL DE BARBEIRO
+// ==========================================
+
+model BarberProfile {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantMemberId String   @unique @db.ObjectId
+  specialty      String[] // Especialidades (ex: ["Corte masculino", "Barba"])
+  commissionRate Float    @default(0.0) // Percentual de comissão (0.0 a 100.0)
+  photoUrl       String?  // URL da foto no Cloudinary
+  bio            String?  // Biografia / descrição do barbeiro
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenantMember TenantMember @relation(fields: [tenantMemberId], references: [id], onDelete: Cascade)
+  availability BarberAvailability[]
+
+  @@map("barber_profiles")
+}
+
+// ==========================================
+// 5. DISPONIBILIDADE SEMANAL DO BARBEIRO
+// ==========================================
+
+model BarberAvailability {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  barberProfileId String   @db.ObjectId
+  dayOfWeek       Int      // 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
+  startTime       String   // "08:00"
+  endTime         String   // "18:00"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  barberProfile BarberProfile @relation(fields: [barberProfileId], references: [id], onDelete: Cascade)
+
+  @@map("barber_availability")
+}
+
+// ==========================================
+// 6. PLANOS DE ASSINATURA
+// ==========================================
+
+model Plan {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  companyId       String        @db.ObjectId
+  name            String
+  description     String?
+  price           Float
+  badge           String?       // Ex: "Recomendado", "Mais popular", "Premium"
+  includedServiceIds String[] @db.ObjectId // IDs dos serviços incluídos neste plano
+  commissionTiers Json          // [{"level":1,"percentage":20},{"level":2,"percentage":10}]
+  status          PlanStatus    @default(ACTIVE)
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, name])
+  @@map("plans")
+}
+
+// ==========================================
+// 7. SERVIÇOS
+// ==========================================
+
+model Service {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  companyId       String      @db.ObjectId
+  name            String
+  description     String?
+  price           Float
+  duration        Int         // Duração em minutos
+  category        String?     // Ex: "Corte", "Barba", "Hidratação"
+  commissionTiers Json        // [{"level":1,"percentage":20}]
+  status          ServiceStatus @default(ACTIVE)
+  sortOrder       Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, name])
+  @@map("services")
+}
+
+// ==========================================
 // ENUNS
 // ==========================================
+enum PlanStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ServiceStatus {
+  ACTIVE
+  INACTIVE
+}
+enum TenantRole {
+  OWNER
+  BARBER
+  CLIENT
+}
 enum CompanyStatus {
   ACTIVE // Empresa ativa, mensalidade em dia, site funcionando
   BLOCKED // Bloqueada por falta de pagamento (exibe tela de aviso)

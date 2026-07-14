@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt"
 import { checkRateLimit } from "@/lib/rate-limit"
 
 export const config = {
-  matcher: ["/", "/clientes/:path*", "/api/auth/callback/credentials"],
+  matcher: ["/", "/clientes/:path*", "/barbeiros/:path*", "/planos/:path*", "/servicos/:path*", "/api/auth/callback/credentials"],
 }
 
 export async function proxy(request: NextRequest) {

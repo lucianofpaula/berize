@@ -10,11 +10,14 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { UsersIcon } from "lucide-react"
+import { UsersIcon, ScissorsIcon, CreditCardIcon, BriefcaseIcon } from "lucide-react"
 import Link from "next/link"
 
 const navItems = [
   { title: "Clientes", href: "/clientes", icon: UsersIcon },
+  { title: "Barbeiros", href: "/barbeiros", icon: ScissorsIcon },
+  { title: "Planos", href: "/planos", icon: CreditCardIcon },
+  { title: "Serviços", href: "/servicos", icon: BriefcaseIcon },
 ]
 
 export function AppSidebar({
@@ -39,9 +42,9 @@ export function AppSidebar({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ${
                   active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-sm"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 } group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0`}
               >
