@@ -99,6 +99,30 @@ async function main() {
     console.log("Perfil de barbeiro vinculado:", barbeiro.name)
   }
 
+  // ─── CLIENTES ───
+  const clientes = [
+    { email: "joao.cliente@email.com", name: "João Silva", whatsapp: "11911111111" },
+    { email: "pedro.cliente@email.com", name: "Pedro Santos", whatsapp: "11922222222" },
+    { email: "lucas.cliente@email.com", name: "Lucas Almeida", whatsapp: "11933333333" },
+  ]
+
+  for (const cli of clientes) {
+    let cliUser = await prisma.user.findUnique({ where: { email: cli.email } })
+    if (!cliUser) {
+      const password = await bcrypt.hash("123456", 10)
+      cliUser = await prisma.user.create({
+        data: { email: cli.email, name: cli.name, whatsapp: cli.whatsapp, password },
+      })
+    }
+
+    await prisma.tenantMember.upsert({
+      where: { userId_companyId: { userId: cliUser.id, companyId: company.id } },
+      update: { role: TenantRole.CLIENT },
+      create: { userId: cliUser.id, companyId: company.id, role: TenantRole.CLIENT },
+    })
+    console.log("Cliente vinculado:", cli.name)
+  }
+
   // ─── PLANOS ───
   const planos = [
     {

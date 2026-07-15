@@ -25,6 +25,11 @@ const labels: Record<string, string> = {
   "planos-assinatura": "Planos de assinatura",
   website: "Web Site",
   dados: "Dados",
+  negocio: "Meu Negócio",
+  commerce: "Commerce Hub",
+  configuracao: "Configuração",
+  pagamentos: "Meios de Pagamento",
+  "agente-ia": "Agente de IA",
 }
 
 function segmentLabel(segment: string): string {

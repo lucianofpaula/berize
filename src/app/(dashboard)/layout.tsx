@@ -1,37 +1,37 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
-import { redirect } from "next/navigation"
-import { AppSidebar } from "@/components/app-sidebar"
-import { BreadcrumbNav } from "@/components/breadcrumb-nav"
-import { Separator } from "@/components/ui/separator"
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import { AppSidebar } from "@/components/app-sidebar";
+import { BreadcrumbNav } from "@/components/breadcrumb-nav";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 export default async function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    redirect("/login")
+    redirect("/login");
   }
 
   const user = {
     name: session.user.name ?? "Sem nome",
     email: session.user.email ?? "",
     avatar: session.user.image ?? "",
-  }
+  };
 
   const company = await prisma.company.findFirst({
     where: { ownerId: session.user.id },
     select: { name: true, logo: true, slug: true },
-  })
+  });
 
   return (
     <SidebarProvider>
@@ -52,5 +52,5 @@ export default async function DashboardLayout({
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

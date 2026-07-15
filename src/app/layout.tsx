@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Outfit } from "next/font/google"
+import { ThemeProvider } from "next-themes"
 import "./globals.css"
 
 const outfit = Outfit({
@@ -21,8 +22,13 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${outfit.variable} h-full antialiased font-sans`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   )
 }

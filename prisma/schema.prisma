@@ -77,6 +77,34 @@ model Company {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   logo          String? // URL da logo da empresa
+
+  // --- INFORMAÇÕES GERAIS ---
+  description String? // Descrição do negócio
+  phone       String? // Telefone fixo
+  whatsapp    String? // WhatsApp
+  email       String? // E-mail de contato
+
+  // --- ENDEREÇO (JSON) ---
+  // { "street": "...", "number": "...", "complement": "...", "neighborhood": "...", "city": "...", "state": "...", "zipCode": "..." }
+  address Json?
+
+  // --- REDES SOCIAIS (JSON) ---
+  // { "instagram": "...", "facebook": "...", "tiktok": "...", "youtube": "..." }
+  socialMedia Json?
+
+  // --- DOMÍNIO PERSONALIZADO ---
+  customDomain   String?  @unique // Ex: "barbearia.meudominio.com.br"
+  domainVerified Boolean  @default(false)
+
+  // --- CONFIGURAÇÕES DE AGENDAMENTO ---
+  timezone            String @default("America/Sao_Paulo")
+  appointmentLeadTime Int    @default(60) // Minutos mínimos de antecedência
+  appointmentInterval Int    @default(30) // Intervalo entre horários (minutos)
+
+  // --- METAS ---
+  dailyAppointmentGoal Int    @default(0) // Meta de agendamentos por dia
+  dailyRevenueGoal     Float  @default(0) // Meta de faturamento diário (R$)
+
   // --- CAMPOS DE INDICAÇÃO E PROPRIEDADE ---
 
   // ID do usuário que indicou esta empresa (opcional)
@@ -92,8 +120,32 @@ model Company {
   // Planos e serviços da empresa
   plans      Plan[]
   services   Service[]
+  // Agendamentos
+  appointments Agendamento[]
+  // Horários de funcionamento
+  hours     CompanyHours[]
 
   @@map("companies")
+}
+
+// ==========================================
+// 9. HORÁRIOS DE FUNCIONAMENTO DA EMPRESA
+// ==========================================
+
+model CompanyHours {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  companyId String   @db.ObjectId
+  dayOfWeek Int      // 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
+  openTime  String   // "08:00"
+  closeTime String   // "18:00"
+  isOpen    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, dayOfWeek])
+  @@map("company_hours")
 }
 
 // ==========================================
@@ -136,6 +188,10 @@ model TenantMember {
   // Relação interna para achar o patrocinador direto dentro da mesma coleção
   sponsor   TenantMember?  @relation("Sponsorship", fields: [sponsorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sponsored TenantMember[] @relation("Sponsorship")
+
+  // Agendamentos
+  barberAppointments  Agendamento[] @relation("BarberAppointments")
+  clientAppointments  Agendamento[] @relation("ClientAppointments")
 
   // Evita que o mesmo usuário se vincule mais de uma vez à mesma empresa
   @@unique([userId, companyId])
@@ -229,6 +285,35 @@ model Service {
 
   @@unique([companyId, name])
   @@map("services")
+}
+
+// ==========================================
+// 8. AGENDAMENTOS
+// ==========================================
+
+model Agendamento {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  companyId  String   @db.ObjectId
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  barberId   String   @db.ObjectId // TenantMember id (role BARBER)
+  barber     TenantMember @relation("BarberAppointments", fields: [barberId], references: [id])
+  clientId   String   @db.ObjectId // TenantMember id (role CLIENT)
+  client     TenantMember @relation("ClientAppointments", fields: [clientId], references: [id])
+  date       DateTime
+  startTime  String   // "08:00"
+  endTime    String   // "08:30"
+  status     String   @default("AGENDADO") // AGENDADO, CONFIRMADO, EM_ATENDIMENTO, CONCLUIDO, NOSHOW, CANCELADO
+  notes      String?
+  serviceIds String[] @db.ObjectId
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([companyId, date])
+  @@index([barberId])
+  @@index([clientId])
+  @@map("agendamentos")
 }
 
 // ==========================================
