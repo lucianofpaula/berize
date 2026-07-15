@@ -1,7 +1,12 @@
 import type { Metadata } from "next"
 import { Outfit } from "next/font/google"
-import { ThemeProvider } from "next-themes"
+import dynamic from "next/dynamic"
 import "./globals.css"
+
+const ThemeProvider = dynamic(
+  () => import("next-themes").then((m) => m.ThemeProvider),
+  { ssr: false },
+)
 
 const outfit = Outfit({
   variable: "--font-sans",
