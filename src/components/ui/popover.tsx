@@ -16,6 +16,10 @@ function PopoverTrigger({
   )
 }
 
+function PopoverPortal(props: PopoverPrimitive.Portal.Props) {
+  return <PopoverPrimitive.Portal {...props} />
+}
+
 function PopoverPositioner({
   className,
   ...props
@@ -78,6 +82,7 @@ function Popover({
 export {
   Popover,
   PopoverTrigger,
+  PopoverPortal,
   PopoverPositioner,
   PopoverPopup,
   PopoverArrow,

@@ -7,6 +7,7 @@ import { CalendarIcon } from "lucide-react"
 import {
   Popover,
   PopoverTrigger,
+  PopoverPortal,
   PopoverPositioner,
   PopoverPopup,
 } from "@/components/ui/popover"
@@ -47,16 +48,18 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
         <CalendarIcon className="size-3.5 text-zinc-400" />
         <span>{format(selected, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</span>
       </PopoverTrigger>
-      <PopoverPositioner align="end" sideOffset={6}>
-        <PopoverPopup>
-          <Calendar
-            month={month}
-            selected={selected}
-            onSelect={handleSelect}
-            onMonthChange={setMonth}
-          />
-        </PopoverPopup>
-      </PopoverPositioner>
+      <PopoverPortal>
+        <PopoverPositioner align="end" sideOffset={6}>
+          <PopoverPopup>
+            <Calendar
+              month={month}
+              selected={selected}
+              onSelect={handleSelect}
+              onMonthChange={setMonth}
+            />
+          </PopoverPopup>
+        </PopoverPositioner>
+      </PopoverPortal>
     </Popover>
   )
 }
