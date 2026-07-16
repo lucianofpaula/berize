@@ -3,6 +3,64 @@ import bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
 
+const USER_ID = "6a56294d107ea6ff10f59f41"
+
+const businessCategories = [
+  { name: "Barbearia", description: "Barbearia tradicional ou moderna, cortes masculinos e barba", icon: "Scissors", color: "#f97316", slug: "barbearia", sortOrder: 1 },
+  { name: "Salão de Beleza", description: "Salão feminino e masculino, cabelo, unhas e estética", icon: "Sparkles", color: "#ec4899", slug: "salao-beleza", sortOrder: 2 },
+  { name: "Clínica de Estética", description: "Procedimentos estéticos avançados, limpeza de pele, laser", icon: "Heart", color: "#8b5cf6", slug: "clinica-estetica", sortOrder: 3 },
+  { name: "Studio de Tatuagem", description: "Tatuagem, piercings e body art", icon: "Droplet", color: "#06b6d4", slug: "studio-tatuagem", sortOrder: 4 },
+  { name: "Studio de Sobrancelhas", description: "Design de sobrancelhas, micropigmentação e henna", icon: "Eye", color: "#d946ef", slug: "studio-sobrancelhas", sortOrder: 5 },
+  { name: "Clínica Odontológica", description: "Consultório e clínica dentária", icon: "Smile", color: "#14b8a6", slug: "clinica-odontologica", sortOrder: 6 },
+  { name: "Academia", description: "Academia de musculação, crossfit e funcional", icon: "Dumbbell", color: "#ef4444", slug: "academia", sortOrder: 7 },
+  { name: "Estúdio de Pilates", description: "Pilates solo e aparelhos, reabilitação e condicionamento", icon: "Activity", color: "#22c55e", slug: "studio-pilates", sortOrder: 8 },
+  { name: "Clínica de Fisioterapia", description: "Fisioterapia, quiropraxia e reabilitação", icon: "Bone", color: "#3b82f6", slug: "clinica-fisioterapia", sortOrder: 9 },
+  { name: "Spá", description: "Spá relaxante, massagens e tratamentos corporais", icon: "Flower2", color: "#a855f7", slug: "spa", sortOrder: 10 },
+  { name: "Restaurante", description: "Restaurante, bistro e serviços de alimentação", icon: "Utensils", color: "#eab308", slug: "restaurante", sortOrder: 11 },
+  { name: "Cafeteria", description: "Cafeteria, café especial e drinks", icon: "Coffee", color: "#92400e", slug: "cafeteria", sortOrder: 12 },
+  { name: "Pet Shop", description: "Banho e tosa, cuidados veterinários e produtos pet", icon: "Dog", color: "#f97316", slug: "petshop", sortOrder: 13 },
+  { name: "Clínica Veterinária", description: "Consultas, cirurgias e exames veterinários", icon: "Stethoscope", color: "#10b981", slug: "clinica-veterinaria", sortOrder: 14 },
+  { name: "Estúdio de Yoga", description: "Yoga, meditação e bem-estar", icon: "Leaf", color: "#84cc16", slug: "studio-yoga", sortOrder: 15 },
+  { name: "Oficina Mecânica", description: "Mecânica automotiva, revisão e reparos", icon: "Wrench", color: "#64748b", slug: "oficina-mecanica", sortOrder: 16 },
+  { name: "Borracheiro", description: "Borracheiro, alinhamento e balanceamento", icon: "CircleDot", color: "#1e293b", slug: "borracheiro", sortOrder: 17 },
+  { name: "Lava-Rápido", description: "Lavagem automotiva, higienização e detalhamento", icon: "Car", color: "#0ea5e9", slug: "lava-rapido", sortOrder: 18 },
+  { name: "Escola / Curso", description: "Escola de idiomas, música, dança ou cursos livres", icon: "BookOpen", color: "#6366f1", slug: "escola-curso", sortOrder: 19 },
+  { name: "Studio de Massagem", description: "Massoterapia, quick massage e drenagem linfática", icon: "Hand", color: "#db2777", slug: "studio-massagem", sortOrder: 20 },
+  { name: "Nutrição", description: "Consultório de nutrição e dietética", icon: "Apple", color: "#65a30d", slug: "nutricao", sortOrder: 21 },
+  { name: "Psicologia", description: "Consultório de psicologia e terapia", icon: "Brain", color: "#7c3aed", slug: "psicologia", sortOrder: 22 },
+  { name: "Agência de Turismo", description: "Agência de viagens e turismo", icon: "Plane", color: "#0284c7", slug: "agencia-turismo", sortOrder: 23 },
+  { name: "Imobiliária", description: "Corretagem de imóveis, aluguel e vendas", icon: "Building", color: "#d97706", slug: "imobiliaria", sortOrder: 24 },
+  { name: "Consultório Médico", description: "Consultório particular de especialidades médicas", icon: "Stethoscope", color: "#059669", slug: "consultorio-medico", sortOrder: 25 },
+]
+
+const professionalCategories = [
+  { name: "Cabeleireiro(a)", description: "Profissional especializado em cabelos femininos e masculinos", icon: "Scissors", color: "#ec4899", slug: "cabeleireiro", sortOrder: 1 },
+  { name: "Barbeiro", description: "Profissional especializado em cortes masculinos e barba", icon: "Scissors", color: "#f97316", slug: "barbeiro", sortOrder: 2 },
+  { name: "Manicure / Pedicure", description: "Profissional de unhas, alongamento e nail art", icon: "Hand", color: "#db2777", slug: "manicure-pedicure", sortOrder: 3 },
+  { name: "Maquiador(a)", description: "Maquiagem social, artística e noivas", icon: "Paintbrush", color: "#d946ef", slug: "maquiador", sortOrder: 4 },
+  { name: "Esteticista", description: "Profissional de estética facial e corporal", icon: "Sparkles", color: "#a855f7", slug: "esteticista", sortOrder: 5 },
+  { name: "Tatuador(a)", description: "Tatuador profissional", icon: "Droplet", color: "#06b6d4", slug: "tatuador", sortOrder: 6 },
+  { name: "Piercer", description: "Profissional de perfurações corporais", icon: "CircleDot", color: "#14b8a6", slug: "piercer", sortOrder: 7 },
+  { name: "Designer de Sobrancelhas", description: "Design de sobrancelhas, micropigmentação e henna", icon: "Eye", color: "#d946ef", slug: "designer-sobrancelhas", sortOrder: 8 },
+  { name: "Dentista", description: "Cirurgião-dentista", icon: "Smile", color: "#14b8a6", slug: "dentista", sortOrder: 9 },
+  { name: "Fisioterapeuta", description: "Fisioterapeuta e quiropraxista", icon: "Bone", color: "#3b82f6", slug: "fisioterapeuta", sortOrder: 10 },
+  { name: "Massoterapeuta", description: "Massoterapeuta, quick massage e drenagem", icon: "Hand", color: "#db2777", slug: "massoterapeuta", sortOrder: 11 },
+  { name: "Personal Trainer", description: "Personal trainer, musculação e funcional", icon: "Dumbbell", color: "#ef4444", slug: "personal-trainer", sortOrder: 12 },
+  { name: "Instrutor de Pilates", description: "Instrutor de pilates solo e aparelhos", icon: "Activity", color: "#22c55e", slug: "instrutor-pilates", sortOrder: 13 },
+  { name: "Instrutor de Yoga", description: "Instrutor de yoga e meditação", icon: "Leaf", color: "#84cc16", slug: "instrutor-yoga", sortOrder: 14 },
+  { name: "Nutricionista", description: "Nutricionista clínico e esportivo", icon: "Apple", color: "#65a30d", slug: "nutricionista", sortOrder: 15 },
+  { name: "Psicólogo(a)", description: "Psicólogo clínico e terapeuta", icon: "Brain", color: "#7c3aed", slug: "psicologo", sortOrder: 16 },
+  { name: "Médico(a)", description: "Médico de especialidades clínicas", icon: "Stethoscope", color: "#059669", slug: "medico", sortOrder: 17 },
+  { name: "Veterinário(a)", description: "Médico veterinário", icon: "Dog", color: "#10b981", slug: "veterinario", sortOrder: 18 },
+  { name: "Tosador(a)", description: "Tosador e banhista pet", icon: "Dog", color: "#f97316", slug: "tosador", sortOrder: 19 },
+  { name: "Cozinheiro(a) / Chef", description: "Chef de cozinha e auxiliar", icon: "Utensils", color: "#eab308", slug: "chef", sortOrder: 20 },
+  { name: "Barista", description: "Barista especializado em café", icon: "Coffee", color: "#92400e", slug: "barista", sortOrder: 21 },
+  { name: "Mecânico(a)", description: "Mecânico automotivo", icon: "Wrench", color: "#64748b", slug: "mecanico", sortOrder: 22 },
+  { name: "Professor(a)", description: "Professor de cursos, idiomas ou música", icon: "BookOpen", color: "#6366f1", slug: "professor", sortOrder: 23 },
+  { name: "Depilador(a)", description: "Profissional de depilação com cera e laser", icon: "Zap", color: "#c026d3", slug: "depilador", sortOrder: 24 },
+  { name: "Podólogo(a)", description: "Podólogo clínico", icon: "Foot", color: "#0891b2", slug: "podologo", sortOrder: 25 },
+]
+
 async function main() {
   const email = "lucianofpaula@gmail.com"
   const rawPassword = "221274lu"
@@ -37,7 +95,6 @@ async function main() {
     console.log("Empresa já existe para:", user.email)
   }
 
-  // Cria TenantMember para o dono
   const ownerMember = await prisma.tenantMember.upsert({
     where: {
       userId_companyId: { userId: user.id, companyId: company.id },
@@ -51,7 +108,6 @@ async function main() {
   })
   console.log("Membro dono vinculado:", ownerMember.id)
 
-  // Cria alguns barbeiros de exemplo
   const barbeiros = [
     { email: "ricardo.barbeiro@email.com", name: "Ricardo Oliveira", specialty: ["Corte masculino", "Barba"], commission: 40 },
     { email: "gabriel.barbeiro@email.com", name: "Gabriel Costa", specialty: ["Degradê", "Corte infantil"], commission: 45 },
@@ -99,7 +155,6 @@ async function main() {
     console.log("Perfil de barbeiro vinculado:", barbeiro.name)
   }
 
-  // ─── CLIENTES ───
   const clientes = [
     { email: "joao.cliente@email.com", name: "João Silva", whatsapp: "11911111111" },
     { email: "pedro.cliente@email.com", name: "Pedro Santos", whatsapp: "11922222222" },
@@ -123,7 +178,6 @@ async function main() {
     console.log("Cliente vinculado:", cli.name)
   }
 
-  // ─── PLANOS ───
   const planos = [
     {
       name: "Básico",
@@ -187,7 +241,6 @@ async function main() {
     console.log("Plano criado:", plano.name)
   }
 
-  // ─── SERVIÇOS ───
   const servicos = [
     { name: "Corte masculino", description: "Corte tesoura e máquina com acabamento", price: 45.00, duration: 40, category: "Corte", sortOrder: 1, commissionTiers: [{ level: 1, percentage: 20 }] },
     { name: "Barba completa", description: "Aparação e modelagem de barba com navalha", price: 30.00, duration: 25, category: "Barba", sortOrder: 2, commissionTiers: [{ level: 1, percentage: 20 }] },
@@ -219,6 +272,48 @@ async function main() {
     })
     console.log("Serviço criado:", servico.name)
   }
+
+  // ─── CATEGORIAS ───
+
+  for (const cat of businessCategories) {
+    await prisma.businessCategory.upsert({
+      where: { slug: cat.slug },
+      update: {
+        name: cat.name,
+        description: cat.description,
+        icon: cat.icon,
+        color: cat.color,
+        sortOrder: cat.sortOrder,
+        isActive: true,
+      },
+      create: {
+        ...cat,
+        createdById: USER_ID,
+        isActive: true,
+      },
+    })
+  }
+  console.log(`Seed: ${businessCategories.length} categorias de estabelecimento`)
+
+  for (const cat of professionalCategories) {
+    await prisma.professionalCategory.upsert({
+      where: { slug: cat.slug },
+      update: {
+        name: cat.name,
+        description: cat.description,
+        icon: cat.icon,
+        color: cat.color,
+        sortOrder: cat.sortOrder,
+        isActive: true,
+      },
+      create: {
+        ...cat,
+        createdById: USER_ID,
+        isActive: true,
+      },
+    })
+  }
+  console.log(`Seed: ${professionalCategories.length} categorias de profissional`)
 }
 
 main()

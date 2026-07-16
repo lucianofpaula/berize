@@ -31,6 +31,9 @@ model User {
   referredCompanies Company[]      @relation("CompanyReferrer")
   // Empresas que este usuário é dono (reivindicadas)
   ownedCompanies    Company[]      @relation("CompanyOwner")
+  // Categorias criadas por este usuário
+  createdBusinessCategories  BusinessCategory[]      @relation("BusinessCategoriesCreated")
+  createdProfessionalCategories ProfessionalCategory[] @relation("ProfessionalCategoriesCreated")
 
   @@map("users")
 }
@@ -93,7 +96,7 @@ model Company {
   socialMedia Json?
 
   // --- DOMÍNIO PERSONALIZADO ---
-  customDomain   String?  @unique // Ex: "barbearia.meudominio.com.br"
+  customDomain   String?  // Ex: "barbearia.meudominio.com.br"
   domainVerified Boolean  @default(false)
 
   // --- CONFIGURAÇÕES DE AGENDAMENTO ---
@@ -124,6 +127,9 @@ model Company {
   appointments Agendamento[]
   // Horários de funcionamento
   hours     CompanyHours[]
+  // Categoria do estabelecimento
+  businessCategoryId String? @db.ObjectId
+  businessCategory   BusinessCategory? @relation(fields: [businessCategoryId], references: [id], onDelete: SetNull)
 
   @@map("companies")
 }
@@ -146,6 +152,48 @@ model CompanyHours {
 
   @@unique([companyId, dayOfWeek])
   @@map("company_hours")
+}
+
+// ==========================================
+// 10. CATEGORIAS
+// ==========================================
+
+model BusinessCategory {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  icon        String?  // Nome do ícone (lucide) para representação visual
+  color       String?  // Hex color ex: "#f97316"
+  slug        String   @unique
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdById String   @db.ObjectId // ID do usuário que criou
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy   User      @relation("BusinessCategoriesCreated", fields: [createdById], references: [id])
+  companies   Company[]
+
+  @@map("business_categories")
+}
+
+model ProfessionalCategory {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  icon        String?  // Nome do ícone (lucide) para representação visual
+  color       String?  // Hex color ex: "#3b82f6"
+  slug        String   @unique
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdById String   @db.ObjectId // ID do usuário que criou
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy   User              @relation("ProfessionalCategoriesCreated", fields: [createdById], references: [id])
+  barberProfiles BarberProfile[]
+
+  @@map("professional_categories")
 }
 
 // ==========================================
@@ -215,8 +263,10 @@ model BarberProfile {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  tenantMember TenantMember @relation(fields: [tenantMemberId], references: [id], onDelete: Cascade)
-  availability BarberAvailability[]
+  tenantMember           TenantMember          @relation(fields: [tenantMemberId], references: [id], onDelete: Cascade)
+  availability           BarberAvailability[]
+  professionalCategoryId String?               @db.ObjectId
+  professionalCategory   ProfessionalCategory?  @relation(fields: [professionalCategoryId], references: [id], onDelete: SetNull)
 
   @@map("barber_profiles")
 }
