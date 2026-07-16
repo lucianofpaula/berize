@@ -12,7 +12,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
-import { UsersIcon, ScissorsIcon, CreditCardIcon, BriefcaseIcon, CalendarIcon, ListIcon, ChevronDownIcon, Building2Icon, SettingsIcon, GlobeIcon, BotIcon, ShoppingCartIcon } from "lucide-react"
+import { UsersIcon, ScissorsIcon, CreditCardIcon, BriefcaseIcon, CalendarIcon, ListIcon, ChevronDownIcon, Building2Icon, SettingsIcon, GlobeIcon, BotIcon, ShoppingCartIcon, MegaphoneIcon, TicketIcon } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
@@ -21,6 +21,11 @@ const navItems = [
   { title: "Barbeiros", href: "/barbeiros", icon: ScissorsIcon },
   { title: "Planos", href: "/planos", icon: CreditCardIcon },
   { title: "Serviços", href: "/servicos", icon: BriefcaseIcon },
+]
+
+const campanhasSub = [
+  { title: "Lista de Campanhas", href: "/campanhas", icon: MegaphoneIcon },
+  { title: "Cupons", href: "/campanhas/cupons", icon: TicketIcon },
 ]
 
 const agendamentosSub = [
@@ -44,9 +49,11 @@ export function AppSidebar({
   company: { name: string; logo: string | null; slug: string } | null
 }) {
   const pathname = usePathname()
+  const campanhasActive = pathname.startsWith("/campanhas")
   const agendamentosActive = pathname.startsWith("/agendamentos")
   const negocioActive = pathname.startsWith("/negocio")
-  const [open, setOpen] = useState(agendamentosActive)
+  const [campanhasOpen, setCampanhasOpen] = useState(campanhasActive)
+  const [agendamentosOpen, setAgendamentosOpen] = useState(agendamentosActive)
   const [negocioOpen, setNegocioOpen] = useState(negocioActive)
 
   return (
@@ -76,7 +83,50 @@ export function AppSidebar({
             )
           })}
 
-          <Collapsible open={open} onOpenChange={setOpen}>
+          {/* Campanhas */}
+          <Collapsible open={campanhasOpen} onOpenChange={setCampanhasOpen}>
+            <CollapsibleTrigger
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 ${
+                campanhasActive
+                  ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-sm"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              }`}
+            >
+              <MegaphoneIcon className="size-4 shrink-0" />
+              <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
+                Campanhas
+              </span>
+              <ChevronDownIcon
+                className={`size-3 transition-transform group-data-[collapsible=icon]:hidden ${
+                  campanhasOpen ? "rotate-180" : ""
+                }`}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="ml-2 flex flex-col gap-0.5 border-l border-zinc-200 dark:border-zinc-800 pl-3 group-data-[collapsible=icon]:hidden">
+                {campanhasSub.map((item) => {
+                  const active = pathname === item.href
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-all ${
+                        active
+                          ? "bg-orange-500/50 text-white font-medium"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      }`}
+                    >
+                      <item.icon className="size-3.5 shrink-0" />
+                      {item.title}
+                    </Link>
+                  )
+                })}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Agendamentos */}
+          <Collapsible open={agendamentosOpen} onOpenChange={setAgendamentosOpen}>
             <CollapsibleTrigger
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 ${
                 agendamentosActive
@@ -90,7 +140,7 @@ export function AppSidebar({
               </span>
               <ChevronDownIcon
                 className={`size-3 transition-transform group-data-[collapsible=icon]:hidden ${
-                  open ? "rotate-180" : ""
+                  agendamentosOpen ? "rotate-180" : ""
                 }`}
               />
             </CollapsibleTrigger>
@@ -117,6 +167,7 @@ export function AppSidebar({
             </CollapsibleContent>
           </Collapsible>
 
+          {/* Negócio */}
           <div className="mt-3 mb-1 px-3 group-data-[collapsible=icon]:hidden">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
               Negócio

@@ -22,9 +22,9 @@ interface DatePickerProps {
 
 export function DatePicker({ value, onChange, className }: DatePickerProps) {
   const [open, setOpen] = useState(false)
-  const [month, setMonth] = useState(() => new Date(value + "T12:00:00"))
+  const [month, setMonth] = useState(() => value ? new Date(value + "T12:00:00") : new Date())
 
-  const selected = new Date(value + "T12:00:00")
+  const selected = value ? new Date(value + "T12:00:00") : new Date()
 
   const handleSelect = useCallback(
     (date: Date) => {
@@ -46,7 +46,7 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
         )}
       >
         <CalendarIcon className="size-3.5 text-zinc-400" />
-        <span>{format(selected, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</span>
+        <span>{value ? format(selected, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecionar data"}</span>
       </PopoverTrigger>
       <PopoverPortal>
         <PopoverPositioner align="end" sideOffset={6}>

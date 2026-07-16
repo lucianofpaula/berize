@@ -131,6 +131,9 @@ model Company {
   businessCategoryId String? @db.ObjectId
   businessCategory   BusinessCategory? @relation(fields: [businessCategoryId], references: [id], onDelete: SetNull)
 
+  // Campanhas de marketing
+  campaigns Campaign[]
+
   @@map("companies")
 }
 
@@ -152,6 +155,84 @@ model CompanyHours {
 
   @@unique([companyId, dayOfWeek])
   @@map("company_hours")
+}
+
+// ==========================================
+// 9. CAMPANHAS DE MARKETING
+// ==========================================
+
+model Campaign {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  companyId       String   @db.ObjectId
+  title           String
+  subtitle        String?
+  description     String?
+  highlightTitle  String?  // Título em destaque (chamativo)
+  badge           String?  // Tag: "Novidade", "Tempo Limitado", "Exclusivo"
+  buttonText      String   @default("Saiba Mais")
+  buttonUrl       String?  // URL opcional para onde o botão leva
+
+  // Typography
+  titleColor      String   @default("#FFFFFF")
+  titleSize       String   @default("text-3xl") // text-2xl | text-3xl | text-4xl | text-5xl
+  buttonColor     String   @default("#F97316")
+  buttonTextColor String   @default("#FFFFFF")
+  textAlign       String   @default("left") // left | center | right
+
+  // Card style preset
+  cardStyle       String   @default("premium") // classic | gradient | premium | minimal | bordered | highlight
+
+  // Custom background
+  cardBackground  String?  // Cor sólida de fundo (hex) — sobrepõe o padrão do estilo
+  gradientStart   String?  // Cor inicial do gradiente (ex: #F97316)
+  gradientEnd     String?  // Cor final do gradiente (ex: #EA580C)
+  gradientDirection String @default("to-br") // to-r | to-br | to-b | to-bl | to-l | to-tl
+
+  // Border customizations
+  borderEnabled   Boolean  @default(true)
+  borderColor     String?  // Cor da borda (hex) — sobrepõe a cor padrão
+  borderWidth     String   @default("border") // border | border-2 | border-4
+
+  // Animation
+  animation       String   @default("none") // none | pulse | glow | shimmer | float
+
+  // Resgate
+  redemptionType  String   @default("unique") // unique | recurring
+  requiresCoupon  Boolean  @default(false)
+  couponPrefix    String?  // Prefixo do cupom: ex "CORTE24"
+
+  // Duração
+  startDate       DateTime
+  endDate         DateTime
+
+  // Controle
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  coupons Coupon[]
+
+  @@index([companyId, isActive])
+  @@map("campaigns")
+}
+
+model Coupon {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  campaignId String       @db.ObjectId
+  code       String       @unique // Código único do cupom (ex: CORTE24-A7X3K)
+  clientName String?      // Nome do cliente que retirou
+  clientPhone String?     // WhatsApp/telefone do cliente
+  status     CouponStatus @default(ACTIVE) // ACTIVE | USED | EXPIRED | CANCELLED
+  usedAt     DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("coupons")
 }
 
 // ==========================================
@@ -384,8 +465,15 @@ enum TenantRole {
   CLIENT
 }
 enum CompanyStatus {
-  ACTIVE // Empresa ativa, mensalidade em dia, site funcionando
-  BLOCKED // Bloqueada por falta de pagamento (exibe tela de aviso)
-  INACTIVE // Desativada pelo próprio dono
-  CLAIMABLE // Cadastrada por um usuário comum, aguardando o dono real reivindicar
+  ACTIVE
+  BLOCKED
+  INACTIVE
+  CLAIMABLE
+}
+
+enum CouponStatus {
+  ACTIVE
+  USED
+  EXPIRED
+  CANCELLED
 }
