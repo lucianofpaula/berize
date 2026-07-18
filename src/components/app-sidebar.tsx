@@ -10,35 +10,38 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
 import { UsersIcon, ScissorsIcon, CreditCardIcon, BriefcaseIcon, CalendarIcon, ListIcon, ChevronDownIcon, Building2Icon, SettingsIcon, GlobeIcon, BotIcon, ShoppingCartIcon, MegaphoneIcon, TicketIcon } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
+const PREFIX = "/barbearia"
+
 const navItems = [
-  { title: "Clientes", href: "/clientes", icon: UsersIcon },
-  { title: "Barbeiros", href: "/barbeiros", icon: ScissorsIcon },
-  { title: "Planos", href: "/planos", icon: CreditCardIcon },
-  { title: "Serviços", href: "/servicos", icon: BriefcaseIcon },
+  { title: "Clientes", href: `${PREFIX}/clientes`, icon: UsersIcon },
+  { title: "Barbeiros", href: `${PREFIX}/barbeiros`, icon: ScissorsIcon },
+  { title: "Planos", href: `${PREFIX}/planos`, icon: CreditCardIcon },
+  { title: "Serviços", href: `${PREFIX}/servicos`, icon: BriefcaseIcon },
 ]
 
 const campanhasSub = [
-  { title: "Lista de Campanhas", href: "/campanhas", icon: MegaphoneIcon },
-  { title: "Cupons", href: "/campanhas/cupons", icon: TicketIcon },
+  { title: "Lista de Campanhas", href: `${PREFIX}/campanhas`, icon: MegaphoneIcon },
+  { title: "Cupons", href: `${PREFIX}/campanhas/cupons`, icon: TicketIcon },
 ]
 
 const agendamentosSub = [
-  { title: "Agenda", href: "/agendamentos/agenda", icon: CalendarIcon },
-  { title: "Fila", href: "/agendamentos/fila", icon: ListIcon },
+  { title: "Agenda", href: `${PREFIX}/agendamentos/agenda`, icon: CalendarIcon },
+  { title: "Fila", href: `${PREFIX}/agendamentos/fila`, icon: ListIcon },
 ]
 
 const negocioSub = [
-  { title: "Configuração", href: "/negocio/configuracao", icon: SettingsIcon },
-  { title: "Website", href: "/negocio/website", icon: GlobeIcon },
-  { title: "Meios de Pagamento", href: "/negocio/pagamentos", icon: CreditCardIcon },
-  { title: "Commerce Hub", href: "/negocio/commerce", icon: ShoppingCartIcon },
-  { title: "Agente de IA", href: "/negocio/agente-ia", icon: BotIcon },
+  { title: "Configuração", href: `${PREFIX}/negocio/configuracao`, icon: SettingsIcon },
+  { title: "Website", href: `${PREFIX}/negocio/website`, icon: GlobeIcon },
+  { title: "Meios de Pagamento", href: `${PREFIX}/negocio/pagamentos`, icon: CreditCardIcon },
+  { title: "Commerce Hub", href: `${PREFIX}/negocio/commerce`, icon: ShoppingCartIcon },
+  { title: "Agente de IA", href: `${PREFIX}/negocio/agente-ia`, icon: BotIcon },
 ]
 
 export function AppSidebar({
@@ -49,12 +52,15 @@ export function AppSidebar({
   company: { name: string; logo: string | null; slug: string } | null
 }) {
   const pathname = usePathname()
-  const campanhasActive = pathname.startsWith("/campanhas")
-  const agendamentosActive = pathname.startsWith("/agendamentos")
-  const negocioActive = pathname.startsWith("/negocio")
+  const { isMobile, setOpenMobile } = useSidebar()
+  const campanhasActive = pathname.startsWith(`${PREFIX}/campanhas`)
+  const agendamentosActive = pathname.startsWith(`${PREFIX}/agendamentos`)
+  const negocioActive = pathname.startsWith(`${PREFIX}/negocio`)
   const [campanhasOpen, setCampanhasOpen] = useState(campanhasActive)
   const [agendamentosOpen, setAgendamentosOpen] = useState(agendamentosActive)
   const [negocioOpen, setNegocioOpen] = useState(negocioActive)
+
+  const closeMobile = () => { if (isMobile) setOpenMobile(false) }
 
   return (
     <Sidebar collapsible="icon" className="bg-white dark:bg-zinc-950">
@@ -69,6 +75,7 @@ export function AppSidebar({
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={closeMobile}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ${
                   active
                     ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-sm"
@@ -110,6 +117,7 @@ export function AppSidebar({
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={closeMobile}
                       className={`flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-all ${
                         active
                           ? "bg-orange-500/50 text-white font-medium"
@@ -152,6 +160,7 @@ export function AppSidebar({
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={closeMobile}
                       className={`flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-all ${
                         active
                           ? "bg-orange-500/50 text-white font-medium"
@@ -200,6 +209,7 @@ export function AppSidebar({
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={closeMobile}
                       className={`flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-all ${
                         active
                           ? "bg-orange-500/50 text-white font-medium"
