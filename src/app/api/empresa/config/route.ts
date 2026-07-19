@@ -36,6 +36,9 @@ export async function GET() {
     appointmentInterval: company.appointmentInterval,
     dailyAppointmentGoal: company.dailyAppointmentGoal ?? 0,
     dailyRevenueGoal: company.dailyRevenueGoal ?? 0,
+    loyaltyEnabled: company.loyaltyEnabled,
+    loyaltyStampsRequired: company.loyaltyStampsRequired,
+    loyaltyRewardDescription: company.loyaltyRewardDescription,
     hours: company.hours.map((h) => ({
       id: h.id,
       dayOfWeek: h.dayOfWeek,
@@ -77,6 +80,10 @@ export async function PUT(request: Request) {
     appointmentInterval,
     dailyAppointmentGoal,
     dailyRevenueGoal,
+    loyaltyEnabled,
+    loyaltyStampsRequired,
+    loyaltyRewardDescription,
+    brandPalette,
     hours,
   } = body
 
@@ -96,6 +103,10 @@ export async function PUT(request: Request) {
   if (appointmentInterval !== undefined) updateData.appointmentInterval = appointmentInterval
   if (dailyAppointmentGoal !== undefined) updateData.dailyAppointmentGoal = dailyAppointmentGoal
   if (dailyRevenueGoal !== undefined) updateData.dailyRevenueGoal = dailyRevenueGoal
+  if (loyaltyEnabled !== undefined) updateData.loyaltyEnabled = loyaltyEnabled
+  if (loyaltyStampsRequired !== undefined) updateData.loyaltyStampsRequired = loyaltyStampsRequired
+  if (loyaltyRewardDescription !== undefined) updateData.loyaltyRewardDescription = loyaltyRewardDescription
+  if (brandPalette !== undefined) updateData.brandPalette = brandPalette
 
   if (Object.keys(updateData).length > 0) {
     await prisma.company.update({

@@ -49,6 +49,20 @@ export async function PUT(
         },
       },
     })
+
+    if (body.status === "CONCLUIDO" && existente.clientId) {
+      const comp = await prisma.company.findUnique({
+        where: { id: company.id },
+        select: { loyaltyEnabled: true },
+      })
+      if (comp?.loyaltyEnabled) {
+        await prisma.tenantMember.update({
+          where: { id: existente.clientId },
+          data: { loyaltyPoints: { increment: 1 } },
+        })
+      }
+    }
+
     return NextResponse.json(atualizado)
   }
 

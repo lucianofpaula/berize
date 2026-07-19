@@ -108,6 +108,18 @@ model Company {
   dailyAppointmentGoal Int    @default(0) // Meta de agendamentos por dia
   dailyRevenueGoal     Float  @default(0) // Meta de faturamento diário (R$)
 
+  // --- CARTÃO FIDELIDADE ---
+  loyaltyEnabled            Boolean @default(false)
+  loyaltyStampsRequired     Int     @default(10)
+  loyaltyRewardDescription  String  @default("Ganhe 1 corte grátis")
+
+  // --- BRAND PALETTE ---
+  brandPalette String @default("classic")
+
+  // --- WEBSITE ---
+  websiteEnabled  Boolean @default(false)
+  websiteSections Json?   // Array de seções do site: [{ id, type, title, enabled, content }]
+
   // --- CAMPOS DE INDICAÇÃO E PROPRIEDADE ---
 
   // ID do usuário que indicou esta empresa (opcional)
@@ -169,11 +181,16 @@ model Campaign {
   description     String?
   highlightTitle  String?  // Título em destaque (chamativo)
   badge           String?  // Tag: "Novidade", "Tempo Limitado", "Exclusivo"
+  badgeColor      String   @default("#F97316")
+  badgeTextColor  String   @default("#FFFFFF")
   buttonText      String   @default("Saiba Mais")
   buttonUrl       String?  // URL opcional para onde o botão leva
 
   // Typography
   titleColor      String   @default("#FFFFFF")
+  subtitleColor   String   @default("#FFFFFF")
+  descriptionColor String  @default("#FFFFFF")
+  highlightColor  String   @default("#FFFFFF")
   titleSize       String   @default("text-3xl") // text-2xl | text-3xl | text-4xl | text-5xl
   buttonColor     String   @default("#F97316")
   buttonTextColor String   @default("#FFFFFF")
@@ -211,8 +228,9 @@ model Campaign {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  coupons Coupon[]
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  coupons   Coupon[]
+  acquiredClients TenantMember[] @relation("CampaignSource")
 
   @@index([companyId, isActive])
   @@map("campaigns")
@@ -292,11 +310,15 @@ model TenantMember {
   role TenantRole @default(CLIENT)
 
   // Dados financeiros e de fidelidade específicos desta empresa
-  loyaltyPoints     Int   @default(0)
-  commissionBalance Float @default(0.0)
+  loyaltyPoints     Int    @default(0)
+  commissionBalance Float  @default(0.0)
+  subscriptionStatus String @default("free") // "free" | "premium"
 
   // Perfil de barbeiro (apenas se role = BARBER)
   barberProfile BarberProfile?
+
+  // Campanha que originou este cliente (atribuição marketing)
+  campaignSourceId String? @db.ObjectId
 
   // --- ESTRUTURA DO MARKETING MULTINÍVEL (MMN) ---
 
@@ -317,6 +339,9 @@ model TenantMember {
   // Relação interna para achar o patrocinador direto dentro da mesma coleção
   sponsor   TenantMember?  @relation("Sponsorship", fields: [sponsorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sponsored TenantMember[] @relation("Sponsorship")
+
+  // Campanha que originou este cliente
+  campaignSource Campaign? @relation("CampaignSource", fields: [campaignSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   // Agendamentos
   barberAppointments  Agendamento[] @relation("BarberAppointments")

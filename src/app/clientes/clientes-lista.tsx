@@ -14,6 +14,7 @@ import {
   CalendarIcon,
   ScissorsIcon,
   UserIcon,
+  MegaphoneIcon,
 } from "lucide-react"
 
 type Cliente = {
@@ -26,6 +27,7 @@ type Cliente = {
   totalVisitas: number
   ultimaVisita: string | null
   status: "ativo"
+  campanhaOrigem: string | null
 }
 
 const ITENS_POR_PAGINA = 20
@@ -111,6 +113,14 @@ function CardCliente({
             </h3>
           </div>
 
+          {cliente.campanhaOrigem && (
+            <div className="mt-2 mb-1">
+              <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 dark:bg-purple-950/30 px-2 py-0.5 text-[10px] font-medium text-purple-700 dark:text-purple-400">
+                <MegaphoneIcon className="size-2.5" />
+                Campanha: {cliente.campanhaOrigem}
+              </span>
+            </div>
+          )}
           <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-zinc-500 dark:text-zinc-400">
             <span className="flex items-center gap-1.5 truncate">
               <MailIcon className="size-3 shrink-0" />

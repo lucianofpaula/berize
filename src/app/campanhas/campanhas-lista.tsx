@@ -27,7 +27,12 @@ type CampaignItem = {
   badge: string | null
   buttonText: string
   titleColor: string
+  subtitleColor: string
+  descriptionColor: string
+  highlightColor: string
   titleSize: string
+  badgeColor: string
+  badgeTextColor: string
   buttonColor: string
   buttonTextColor: string
   cardStyle: string
@@ -179,8 +184,13 @@ export function CampanhasLista({ data }: { data: CampaignItem[] }) {
                       description: campanha.description,
                       highlightTitle: campanha.highlightTitle,
                       badge: campanha.badge,
+                      badgeColor: campanha.badgeColor,
+                      badgeTextColor: campanha.badgeTextColor,
                       buttonText: campanha.buttonText,
                       titleColor: campanha.titleColor,
+                      subtitleColor: campanha.subtitleColor,
+                      descriptionColor: campanha.descriptionColor,
+                      highlightColor: campanha.highlightColor,
                       titleSize: campanha.titleSize,
                       buttonColor: campanha.buttonColor,
                       buttonTextColor: campanha.buttonTextColor,

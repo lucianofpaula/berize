@@ -19,6 +19,7 @@ import {
   Loader2Icon,
   TargetIcon,
   DollarSignIcon,
+  GiftIcon,
 } from "lucide-react"
 
 type Hour = {
@@ -64,6 +65,10 @@ type InitialData = {
   appointmentInterval: number
   dailyAppointmentGoal: number
   dailyRevenueGoal: number
+  loyaltyEnabled: boolean
+  loyaltyStampsRequired: number
+  loyaltyRewardDescription: string
+  brandPalette?: string
   hours: Hour[]
 }
 
@@ -100,6 +105,9 @@ export function CompanyConfigForm({ initialData }: { initialData: InitialData })
   const [appointmentInterval, setAppointmentInterval] = useState(initialData.appointmentInterval)
   const [dailyAppointmentGoal, setDailyAppointmentGoal] = useState(initialData.dailyAppointmentGoal ?? 0)
   const [dailyRevenueGoal, setDailyRevenueGoal] = useState(initialData.dailyRevenueGoal ?? 0)
+  const [loyaltyEnabled, setLoyaltyEnabled] = useState(initialData.loyaltyEnabled ?? false)
+  const [loyaltyStampsRequired, setLoyaltyStampsRequired] = useState(initialData.loyaltyStampsRequired ?? 10)
+  const [loyaltyRewardDescription, setLoyaltyRewardDescription] = useState(initialData.loyaltyRewardDescription ?? "Ganhe 1 corte grátis")
   const [hours, setHours] = useState<Hour[]>(initialData.hours.length > 0 ? initialData.hours : createDefaultHours())
 
   function createDefaultHours(): Hour[] {
@@ -147,6 +155,9 @@ export function CompanyConfigForm({ initialData }: { initialData: InitialData })
       appointmentInterval,
       dailyAppointmentGoal,
       dailyRevenueGoal,
+      loyaltyEnabled,
+      loyaltyStampsRequired,
+      loyaltyRewardDescription,
       hours: hours.map((h) => ({
         dayOfWeek: h.dayOfWeek,
         openTime: h.openTime,
@@ -642,6 +653,72 @@ export function CompanyConfigForm({ initialData }: { initialData: InitialData })
             <p className="text-xs text-zinc-400 mt-1">Quanto você quer faturar por dia.</p>
           </div>
         </div>
+      </div>
+
+      {/* Cartão Fidelidade */}
+      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm space-y-5">
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+          <GiftIcon className="size-4 text-zinc-400" />
+          Cartão Fidelidade
+        </h3>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setLoyaltyEnabled(!loyaltyEnabled)}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-50 ${
+              loyaltyEnabled ? "bg-emerald-500" : "bg-zinc-300 dark:bg-zinc-700"
+            }`}
+            role="switch"
+            aria-checked={loyaltyEnabled}
+          >
+            <span
+              className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow-sm ring-0 transition-transform ${
+                loyaltyEnabled ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+          <div>
+            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+              Programa de fidelidade
+            </span>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              {loyaltyEnabled ? "Clientes ganham selos a cada visita" : "Desativado"}
+            </p>
+          </div>
+        </div>
+
+        {loyaltyEnabled && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                Selos necessários
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={loyaltyStampsRequired}
+                onChange={(e) => setLoyaltyStampsRequired(Math.max(1, Number(e.target.value)))}
+                placeholder="10"
+                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+              />
+              <p className="text-xs text-zinc-400 mt-1">Quantos selos o cliente precisa para ganhar a recompensa.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                Descrição da recompensa
+              </label>
+              <input
+                type="text"
+                value={loyaltyRewardDescription}
+                onChange={(e) => setLoyaltyRewardDescription(e.target.value)}
+                placeholder="Ganhe 1 corte grátis"
+                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+              />
+              <p className="text-xs text-zinc-400 mt-1">O que o cliente ganha ao completar o cartão.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Ações */}

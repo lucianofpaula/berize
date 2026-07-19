@@ -46,6 +46,75 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Landing page tokens */
+  --color-ld-surface: #071423;
+  --color-ld-surface-elevated: #141c26;
+  --color-ld-surface-container-lowest: #030f1d;
+  --color-ld-surface-container-low: #0f1c2b;
+  --color-ld-surface-container-high: #1e2b3a;
+  --color-ld-surface-variant: #293645;
+  --color-ld-on-surface: #d6e3f8;
+  --color-ld-on-surface-variant: #e2bfb0;
+  --color-ld-primary: #ffb693;
+  --color-ld-primary-container: #ff6b00;
+  --color-ld-on-primary-container: #ffffff;
+  --color-ld-accent: #ff6b00;
+  --color-ld-accent-glow: rgba(255, 107, 0, 0.15);
+  --color-ld-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-ld-foreground: #d6e3f8;
+  --color-ld-muted: #293645;
+  --color-ld-muted-foreground: #e2bfb0;
+  --color-ld-card: #141c26;
+  --color-ld-card-foreground: #d6e3f8;
+  --color-ld-secondary: #c1c7d2;
+  --color-ld-secondary-foreground: #2b313a;
+  --color-ld-on-secondary-container: #b0b5c1;
+  --color-ld-bg: #071423;
+
+  /* Landing page spacing & typography */
+  --font-headline-lg: var(--font-sans);
+  --font-headline-md: var(--font-sans);
+  --font-body-lg: var(--font-sans);
+  --font-body-md: var(--font-sans);
+  --font-button-text: var(--font-sans);
+  --font-label-sm: var(--font-mono);
+
+  --text-headline-lg: 40px;
+  --text-headline-lg--line-height: 48px;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 700;
+
+  --text-headline-lg-mobile: 32px;
+  --text-headline-lg-mobile--line-height: 38px;
+  --text-headline-lg-mobile--font-weight: 700;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 600;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+  --text-body-md--font-weight: 400;
+
+  --text-button-text: 16px;
+  --text-button-text--line-height: 20px;
+  --text-button-text--letter-spacing: 0.01em;
+  --text-button-text--font-weight: 600;
+
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--letter-spacing: 0.05em;
+  --text-label-sm--font-weight: 500;
+
+  --spacing-margin-mobile: 16px;
+  --spacing-gutter: 24px;
+  --spacing-widget-padding: 32px;
+  --spacing-container-max-width: 1280px;
 }
 
 :root {

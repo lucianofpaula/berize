@@ -29,18 +29,12 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: email.toLowerCase() },
-          include: { ownedCompanies: true },
         })
 
         if (!user?.password) return null
 
         const isValid = await bcrypt.compare(password, user.password)
         if (!isValid) return null
-
-        const hasCompany = user.ownedCompanies.length > 0
-        if (!hasCompany) {
-          throw new Error("Você não tem uma empresa vinculada a você")
-        }
 
         return {
           id: user.id,
@@ -57,11 +51,26 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.id = user.id
+      if (user) {
+        token.id = user.id
+        token.isOwner = false
+        try {
+          const [owned, member] = await Promise.all([
+            prisma.company.findFirst({ where: { ownerId: user.id }, select: { id: true } }),
+            prisma.tenantMember.findFirst({ where: { userId: user.id, role: "OWNER" }, select: { id: true } }),
+          ])
+          token.isOwner = !!(owned ?? member)
+        } catch {
+          // fallback: assume não-owner
+        }
+      }
       return token
     },
     async session({ session, token }) {
-      if (session.user) session.user.id = token.id as string
+      if (session.user) {
+        session.user.id = token.id as string
+        session.user.isOwner = token.isOwner as boolean
+      }
       return session
     },
   },

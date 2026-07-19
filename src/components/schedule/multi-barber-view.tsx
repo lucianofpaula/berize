@@ -3,8 +3,8 @@
 import { useMemo } from "react"
 import { ScheduleList } from "@/components/schedule/schedule-list"
 import type { Barber } from "@/lib/schedule-types"
-import type { BarberStats } from "@/app/barbearia/agendamentos/agenda/agenda-content"
-import type { SlotData } from "@/app/barbearia/agendamentos/agenda/agenda-content"
+import type { BarberStats } from "@/app/meu-negocio/agendamentos/agenda/agenda-content"
+import type { SlotData } from "@/app/meu-negocio/agendamentos/agenda/agenda-content"
 
 interface MultiBarberViewProps {
   barbers: Barber[]

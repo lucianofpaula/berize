@@ -10,6 +10,7 @@ cloudinary.config({
 export async function POST(request: Request) {
   const formData = await request.formData()
   const file = formData.get("file") as File | null
+  const folder = (formData.get("folder") as string) || "berize"
 
   if (!file) {
     return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400 })
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
 
   return new Promise<NextResponse>((resolve) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: "berize/barbeiros" },
+      { folder },
       (error, result) => {
         if (error) {
           resolve(NextResponse.json({ error: error.message }, { status: 500 }))

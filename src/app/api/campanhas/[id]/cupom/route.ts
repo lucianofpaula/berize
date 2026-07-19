@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import crypto from "crypto"
+import { findOrCreateTenantClient } from "@/lib/tenant-client"
 
 function gerarCodigo(prefixo?: string): string {
   const prefix = prefixo ? prefixo.toUpperCase().replace(/[^A-Z0-9]/g, "") : "CUPOM"
@@ -66,6 +67,26 @@ export async function POST(
       status: "ACTIVE",
     },
   })
+
+  if (clientName || clientPhone) {
+    const company = await prisma.company.findFirst({
+      where: { ownerId: session.user.id },
+      select: { id: true },
+    })
+    if (company) {
+      const { member } = await findOrCreateTenantClient({
+        companyId: company.id,
+        name: clientName,
+        phone: clientPhone,
+      })
+      if (!member.campaignSourceId) {
+        await prisma.tenantMember.update({
+          where: { id: member.id },
+          data: { campaignSourceId: id },
+        })
+      }
+    }
+  }
 
   return NextResponse.json({ coupon })
 }

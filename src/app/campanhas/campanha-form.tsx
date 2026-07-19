@@ -4,6 +4,7 @@ import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { DatePicker } from "@/components/ui/date-picker"
 import { CampaignCardPreview } from "@/app/campanhas/campanha-card-preview"
+import { ColorPickerPopover, DualColorPopover } from "@/components/ui/color-picker-popover"
 import {
   ChevronLeftIcon,
   CheckCircle2Icon,
@@ -15,14 +16,15 @@ import {
   TagIcon,
   MousePointerClickIcon,
   AlignLeftIcon,
-  PaletteIcon,
   SparklesIcon,
   Loader2Icon,
   SquareIcon,
   ImageIcon,
   LayersIcon,
   PlayIcon,
+  ChevronDownIcon,
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 type CampaignFormData = {
   id?: string
@@ -34,9 +36,14 @@ type CampaignFormData = {
   buttonText: string
   buttonUrl: string
   titleColor: string
+  subtitleColor: string
+  descriptionColor: string
+  highlightColor: string
   titleSize: string
   buttonColor: string
   buttonTextColor: string
+  badgeColor: string
+  badgeTextColor: string
   cardStyle: string
   textAlign: string
   cardBackground: string
@@ -132,9 +139,14 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
   const [description, setDescription] = useState(initialData?.description ?? "")
   const [highlightTitle, setHighlightTitle] = useState(initialData?.highlightTitle ?? "")
   const [badge, setBadge] = useState(initialData?.badge ?? "")
+  const [badgeColor, setBadgeColor] = useState(initialData?.badgeColor ?? "#F97316")
+  const [badgeTextColor, setBadgeTextColor] = useState(initialData?.badgeTextColor ?? "#FFFFFF")
   const [buttonText, setButtonText] = useState(initialData?.buttonText ?? "Saiba Mais")
   const [buttonUrl] = useState(initialData?.buttonUrl ?? "")
   const [titleColor, setTitleColor] = useState(initialData?.titleColor ?? "#FFFFFF")
+  const [subtitleColor, setSubtitleColor] = useState(initialData?.subtitleColor ?? "#FFFFFF")
+  const [descriptionColor, setDescriptionColor] = useState(initialData?.descriptionColor ?? "#FFFFFF")
+  const [highlightColor, setHighlightColor] = useState(initialData?.highlightColor ?? "#FFFFFF")
   const [titleSize, setTitleSize] = useState(initialData?.titleSize ?? "text-3xl")
   const [buttonColor, setButtonColor] = useState(initialData?.buttonColor ?? "#F97316")
   const [buttonTextColor, setButtonTextColor] = useState(initialData?.buttonTextColor ?? "#FFFFFF")
@@ -155,14 +167,30 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
   const [endDate, setEndDate] = useState(initialData?.endDate ?? "")
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true)
 
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+
+  const toggleCollapse = (id: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
   const previewData = {
     title,
     subtitle: subtitle || null,
     description: description || null,
     highlightTitle: highlightTitle || null,
     badge: badge || null,
+    badgeColor,
+    badgeTextColor,
     buttonText,
     titleColor,
+    subtitleColor,
+    descriptionColor,
+    highlightColor,
     titleSize,
     buttonColor,
     buttonTextColor,
@@ -236,9 +264,14 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
         description: description || null,
         highlightTitle: highlightTitle || null,
         badge: badge || null,
+        badgeColor,
+        badgeTextColor,
         buttonText,
         buttonUrl: buttonUrl || null,
         titleColor,
+        subtitleColor,
+        descriptionColor,
+        highlightColor,
         titleSize,
         buttonColor,
         buttonTextColor,
@@ -269,8 +302,42 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
     }
 
     setEnviando(false)
-    router.push("/campanhas")
-    router.refresh()
+    window.location.href = "/campanhas"
+  }
+
+  function CollapsibleSection({
+    id,
+    title,
+    icon: Icon,
+    children,
+  }: {
+    id: string
+    title: string
+    icon: React.ComponentType<{ className?: string }>
+    children: React.ReactNode
+  }) {
+    const isOpen = !collapsed.has(id)
+    return (
+      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
+        <button
+          type="button"
+          onClick={() => toggleCollapse(id)}
+          className="flex w-full items-center justify-between text-left"
+        >
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+            <Icon className="size-4 text-zinc-400" />
+            {title}
+          </h3>
+          <ChevronDownIcon
+            className={cn(
+              "size-4 text-zinc-400 transition-transform duration-200",
+              isOpen && "rotate-180",
+            )}
+          />
+        </button>
+        {isOpen && <div className={cn("mt-5", title === "Borda" ? "space-y-5" : "space-y-4")}>{children}</div>}
+      </div>
+    )
   }
 
   return (
@@ -320,45 +387,55 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
                 )}
                 <span className="hidden sm:inline">{gerandoIA ? "Gerando..." : "Gerar com IA"}</span>
               </button>
+              <ColorPickerPopover value={titleColor} onChange={setTitleColor} label="Cor do Título" />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Subtítulo</label>
-            <div className="relative">
-              <SubtitlesIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-              <input
-                type="text"
-                value={subtitle}
-                onChange={(e) => setSubtitle(e.target.value)}
-                placeholder="Ex: Promoção válida para novos clientes"
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-9 pr-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-              />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <SubtitlesIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+                <input
+                  type="text"
+                  value={subtitle}
+                  onChange={(e) => setSubtitle(e.target.value)}
+                  placeholder="Ex: Promoção válida para novos clientes"
+                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-9 pr-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+                />
+              </div>
+              <ColorPickerPopover value={subtitleColor} onChange={setSubtitleColor} label="Cor do Subtítulo" />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Descrição</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Explique detalhes da campanha..."
-              rows={3}
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 resize-none"
-            />
+            <div className="flex gap-2">
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Explique detalhes da campanha..."
+                rows={3}
+                className="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 resize-none"
+              />
+              <ColorPickerPopover value={descriptionColor} onChange={setDescriptionColor} label="Cor da Descrição" />
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Título em Destaque</label>
-            <div className="relative">
-              <HighlighterIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-              <input
-                type="text"
-                value={highlightTitle}
-                onChange={(e) => setHighlightTitle(e.target.value)}
-                placeholder="Ex: Primeiro corte por apenas"
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-9 pr-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-              />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <HighlighterIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+                <input
+                  type="text"
+                  value={highlightTitle}
+                  onChange={(e) => setHighlightTitle(e.target.value)}
+                  placeholder="Ex: Primeiro corte por apenas"
+                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-9 pr-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+                />
+              </div>
+              <ColorPickerPopover value={highlightColor} onChange={setHighlightColor} label="Cor do Destaque" />
             </div>
           </div>
 
@@ -379,18 +456,30 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Badge / Tag</label>
-              <div className="relative">
-                <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 pointer-events-none" />
-                <select
-                  value={badge}
-                  onChange={(e) => setBadge(e.target.value)}
-                  className="appearance-none w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-9 pr-8 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 cursor-pointer"
-                >
-                  {BADGE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <span>Badge / Tag</span>
+              </label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 pointer-events-none" />
+                  <select
+                    value={badge}
+                    onChange={(e) => setBadge(e.target.value)}
+                    className="appearance-none w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-9 pr-8 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 cursor-pointer"
+                  >
+                    {BADGE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <DualColorPopover
+                  valueA={badgeColor}
+                  onChangeA={setBadgeColor}
+                  labelA="Fundo"
+                  valueB={badgeTextColor}
+                  onChangeB={setBadgeTextColor}
+                  labelB="Texto"
+                />
               </div>
             </div>
           </div>
@@ -451,22 +540,6 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
                   Cor de Fundo Personalizada
                 </div>
               </label>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {COLOR_SWATCHES.map((swatch) => (
-                  <button
-                    type="button"
-                    key={swatch.value}
-                    onClick={() => setCardBackground(swatch.value === cardBackground ? "" : swatch.value)}
-                    title={swatch.label}
-                    className={`size-7 rounded-full border-2 transition-all ${
-                      cardBackground === swatch.value
-                        ? "border-orange-500 scale-110 shadow-md"
-                        : "border-transparent hover:scale-110"
-                    }`}
-                    style={{ backgroundColor: swatch.value }}
-                  />
-                ))}
-              </div>
               <input
                 type="text"
                 value={cardBackground}
@@ -615,106 +688,34 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
             </div>
           </div>
 
-          {/* Colors */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                <div className="flex items-center gap-2">
-                  <PaletteIcon className="size-3.5" />
-                  Cor do Título
-                </div>
-              </label>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {COLOR_SWATCHES.map((swatch) => (
-                  <button
-                    type="button"
-                    key={swatch.value}
-                    onClick={() => setTitleColor(swatch.value)}
-                    title={swatch.label}
-                    className={`size-7 rounded-full border-2 transition-all ${
-                      titleColor === swatch.value
-                        ? "border-orange-500 scale-110 shadow-md"
-                        : "border-transparent hover:scale-110"
-                    }`}
-                    style={{ backgroundColor: swatch.value }}
-                  />
-                ))}
-              </div>
-              <input
-                type="text"
-                value={titleColor}
-                onChange={(e) => setTitleColor(e.target.value)}
-                placeholder="#FFFFFF"
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 text-xs text-zinc-900 dark:text-zinc-50 font-mono focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                <div className="flex items-center gap-2">
-                  <PaletteIcon className="size-3.5" />
-                  Cor do Botão
-                </div>
-              </label>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {COLOR_SWATCHES.map((swatch) => (
-                  <button
-                    type="button"
-                    key={swatch.value}
-                    onClick={() => setButtonColor(swatch.value)}
-                    title={swatch.label}
-                    className={`size-7 rounded-full border-2 transition-all ${
-                      buttonColor === swatch.value
-                        ? "border-orange-500 scale-110 shadow-md"
-                        : "border-transparent hover:scale-110"
-                    }`}
-                    style={{ backgroundColor: swatch.value }}
-                  />
-                ))}
-              </div>
-              <input
-                type="text"
-                value={buttonColor}
-                onChange={(e) => setButtonColor(e.target.value)}
-                placeholder="#F97316"
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 text-xs text-zinc-900 dark:text-zinc-50 font-mono focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-              />
-            </div>
-          </div>
-
+          {/* Button Color - Dual Popover */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               <div className="flex items-center gap-2">
-                <PaletteIcon className="size-3.5" />
-                Cor do Texto do Botão
+                <MousePointerClickIcon className="size-3.5" />
+                Cores do Botão
               </div>
             </label>
-            <div className="flex flex-wrap gap-1.5">
-              {COLOR_SWATCHES.map((swatch) => (
-                <button
-                  type="button"
-                  key={swatch.value}
-                  onClick={() => setButtonTextColor(swatch.value)}
-                  title={swatch.label}
-                  className={`size-7 rounded-full border-2 transition-all ${
-                    buttonTextColor === swatch.value
-                      ? "border-orange-500 scale-110 shadow-md"
-                      : "border-transparent hover:scale-110"
-                  }`}
-                  style={{ backgroundColor: swatch.value }}
-                />
-              ))}
+            <div className="flex items-center gap-3">
+              <DualColorPopover
+                valueA={buttonColor}
+                onChangeA={setButtonColor}
+                labelA="Fundo"
+                valueB={buttonTextColor}
+                onChangeB={setButtonTextColor}
+                labelB="Texto"
+              />
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                Fundo: <span className="font-mono text-zinc-700 dark:text-zinc-300">{buttonColor}</span>
+                {" / "}
+                Texto: <span className="font-mono text-zinc-700 dark:text-zinc-300">{buttonTextColor}</span>
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Borda */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm space-y-5">
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-            <SquareIcon className="size-4 text-zinc-400" />
-            Borda
-          </h3>
-
+        {/* Borda (collapsible) */}
+        <CollapsibleSection id="borda" title="Borda" icon={SquareIcon}>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -761,45 +762,31 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   <div className="flex items-center gap-2">
-                    <PaletteIcon className="size-3.5" />
+                    <SquareIcon className="size-3.5" />
                     Cor da Borda
                   </div>
                 </label>
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {COLOR_SWATCHES.map((swatch) => (
-                    <button
-                      type="button"
-                      key={swatch.value}
-                      onClick={() => setBorderColor(swatch.value === borderColor ? "" : swatch.value)}
-                      title={swatch.label}
-                      className={`size-7 rounded-full border-2 transition-all ${
-                        borderColor === swatch.value
-                          ? "border-orange-500 scale-110 shadow-md"
-                          : "border-transparent hover:scale-110"
-                      }`}
-                      style={{ backgroundColor: swatch.value }}
-                    />
-                  ))}
+                <div className="flex items-center gap-2">
+                  <ColorPickerPopover
+                    value={borderColor || "#D4D4D8"}
+                    onChange={(c) => setBorderColor(c === "#D4D4D8" ? "" : c)}
+                    label="Cor da Borda"
+                  />
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {borderColor ? (
+                      <span className="font-mono text-zinc-700 dark:text-zinc-300">{borderColor}</span>
+                    ) : (
+                      "Cor padrão do estilo"
+                    )}
+                  </span>
                 </div>
-                <input
-                  type="text"
-                  value={borderColor}
-                  onChange={(e) => setBorderColor(e.target.value)}
-                  placeholder="Vazio = cor padrão do estilo"
-                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 text-xs text-zinc-900 dark:text-zinc-50 font-mono focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-                />
               </div>
             </>
           )}
-        </div>
+        </CollapsibleSection>
 
-        {/* Animação */}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm space-y-4">
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-            <PlayIcon className="size-4 text-zinc-400" />
-            Animação
-          </h3>
-
+        {/* Animação (collapsible) */}
+        <CollapsibleSection id="animacao" title="Animação" icon={PlayIcon}>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {ANIMATIONS.map((anim) => (
               <button
@@ -832,7 +819,7 @@ export function CampaignForm({ initialData }: { initialData?: CampaignFormData }
               </button>
             ))}
           </div>
-        </div>
+        </CollapsibleSection>
 
         {/* Resgate */}
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm space-y-5">

@@ -8,8 +8,13 @@ type CampaignData = {
   description: string | null
   highlightTitle: string | null
   badge: string | null
+  badgeColor?: string
+  badgeTextColor?: string
   buttonText: string
   titleColor: string
+  subtitleColor?: string
+  descriptionColor?: string
+  highlightColor?: string
   titleSize: string
   buttonColor: string
   buttonTextColor: string
@@ -65,11 +70,23 @@ export function CampaignCardPreview({ data }: { data: CampaignData }) {
   const hasCustomGradient = (data.cardStyle === "gradient" || data.cardStyle === "premium-gradient") && data.gradientStart && data.gradientEnd
   const hasCustomBg = data.cardBackground && !isGradient
 
-  const gradientStyle: React.CSSProperties | undefined = hasCustomGradient
-    ? {
-        backgroundImage: `linear-gradient(to ${data.gradientDirection === "to-br" ? "bottom right" : data.gradientDirection === "to-tr" ? "top right" : data.gradientDirection === "to-bl" ? "bottom left" : data.gradientDirection === "to-tl" ? "top left" : data.gradientDirection === "to-r" ? "right" : data.gradientDirection === "to-l" ? "left" : data.gradientDirection === "to-t" ? "top" : "bottom"}, ${data.gradientStart}, ${data.gradientEnd})`,
-      }
+  function dirCSS(d: string): string {
+    return d === "to-br" ? "bottom right" : d === "to-tr" ? "top right" : d === "to-bl" ? "bottom left" : d === "to-tl" ? "top left" : d === "to-r" ? "right" : d === "to-l" ? "left" : d === "to-t" ? "top" : "bottom"
+  }
+
+  const defaultGradientBg = isGradient && !hasCustomGradient
+    ? data.cardStyle === "premium"
+      ? `linear-gradient(to ${dirCSS(data.gradientDirection)}, #18181b, #09090b)`
+      : data.cardStyle === "premium-gradient"
+        ? `linear-gradient(to ${dirCSS(data.gradientDirection)}, #18181b, #27272a, #78350f)`
+        : `linear-gradient(to ${dirCSS(data.gradientDirection)}, #F97316, #EA580C, #C2410C)`
     : undefined
+
+  const gradientStyle: React.CSSProperties | undefined = hasCustomGradient
+    ? { backgroundImage: `linear-gradient(to ${dirCSS(data.gradientDirection)}, ${data.gradientStart}, ${data.gradientEnd})` }
+    : defaultGradientBg
+      ? { backgroundImage: defaultGradientBg }
+      : undefined
 
   const borderClass =
     !data.borderEnabled
@@ -101,10 +118,10 @@ export function CampaignCardPreview({ data }: { data: CampaignData }) {
         "relative overflow-hidden rounded-2xl p-8 transition-all",
         isGradient && !hasCustomGradient && (
           data.cardStyle === "premium"
-            ? "bg-gradient-to-br from-zinc-900 to-zinc-950 text-white shadow-xl shadow-amber-500/5"
+            ? "text-white shadow-xl shadow-amber-500/5"
             : data.cardStyle === "premium-gradient"
-              ? "bg-gradient-to-br from-zinc-900 via-zinc-800 to-amber-900 text-white shadow-xl shadow-amber-500/10 border border-amber-500/20"
-              : "bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 text-white shadow-lg"),
+              ? "text-white shadow-xl shadow-amber-500/10 border border-amber-500/20"
+              : "text-white shadow-lg"),
         !isGradient && !hasCustomBg && data.cardStyle === "classic" && "bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-zinc-50",
         !isGradient && !hasCustomBg && data.cardStyle === "minimal" && "bg-transparent text-zinc-900 dark:text-zinc-50",
         !isGradient && !hasCustomBg && data.cardStyle !== "classic" && data.cardStyle !== "minimal" && "bg-white dark:bg-zinc-900 shadow-sm text-zinc-900 dark:text-zinc-50",
@@ -114,7 +131,7 @@ export function CampaignCardPreview({ data }: { data: CampaignData }) {
         animClass,
       )}
       style={{
-        ...(hasCustomGradient ? gradientStyle : {}),
+        ...(gradientStyle || {}),
         ...(hasCustomBg && data.cardBackground ? { backgroundColor: data.cardBackground } : {}),
         ...(borderStyleValue || {}),
       } as React.CSSProperties}
@@ -133,12 +150,11 @@ export function CampaignCardPreview({ data }: { data: CampaignData }) {
       <div className={cn("flex flex-col gap-4 relative", isHighlight && "ml-3", align)}>
         {data.badge && (
           <span
-            className={cn(
-              "inline-flex items-center rounded-full px-3 py-0.5 text-[11px] font-semibold uppercase tracking-wider",
-              isGradient || hasCustomGradient
-                ? "bg-white/20 text-white backdrop-blur-sm"
-                : "bg-orange-500 text-white",
-            )}
+            className="inline-flex items-center rounded-full px-3 py-0.5 text-[11px] font-semibold uppercase tracking-wider"
+            style={{
+              backgroundColor: data.badgeColor || "#F97316",
+              color: data.badgeTextColor || "#FFFFFF",
+            }}
           >
             {data.badge}
           </span>
@@ -152,19 +168,19 @@ export function CampaignCardPreview({ data }: { data: CampaignData }) {
         </h2>
 
         {data.subtitle && (
-          <p className="text-sm" style={{ color: data.titleColor + "CC" }}>
+          <p className="text-sm" style={{ color: data.subtitleColor || data.titleColor + "CC" }}>
             {data.subtitle}
           </p>
         )}
 
         {data.highlightTitle && (
-          <p className="text-lg font-semibold" style={{ color: data.titleColor }}>
+          <p className="text-lg font-semibold" style={{ color: data.highlightColor || data.titleColor }}>
             {data.highlightTitle}
           </p>
         )}
 
         {data.description && (
-          <p className="text-sm leading-relaxed max-w-lg" style={{ color: data.titleColor + "99" }}>
+          <p className="text-sm leading-relaxed max-w-lg" style={{ color: data.descriptionColor || data.titleColor + "99" }}>
             {data.description}
           </p>
         )}

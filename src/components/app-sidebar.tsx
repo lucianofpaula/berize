@@ -17,7 +17,7 @@ import { UsersIcon, ScissorsIcon, CreditCardIcon, BriefcaseIcon, CalendarIcon, L
 import Link from "next/link"
 import { useState } from "react"
 
-const PREFIX = "/barbearia"
+const PREFIX = "/meu-negocio"
 
 const navItems = [
   { title: "Clientes", href: `${PREFIX}/clientes`, icon: UsersIcon },

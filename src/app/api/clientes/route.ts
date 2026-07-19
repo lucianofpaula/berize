@@ -45,6 +45,9 @@ export async function GET(request: NextRequest) {
           select: { id: true, date: true, status: true },
           orderBy: { date: "desc" as const },
         },
+        campaignSource: {
+          select: { title: true },
+        },
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -65,6 +68,7 @@ export async function GET(request: NextRequest) {
       totalVisitas,
       ultimaVisita: ultimo ? ultimo.date.toISOString().split("T")[0] : null,
       status: "ativo" as const,
+      campanhaOrigem: (m as any).campaignSource?.title ?? null,
     }
   })
 

@@ -3,12 +3,21 @@ import type { NextRequest } from "next/server"
 import { getToken } from "next-auth/jwt"
 import { checkRateLimit } from "@/lib/rate-limit"
 
+const PUBLIC_ROUTES = ["/", "/login", "/exemplos", "/exemplos/:path*"]
+
 export const config = {
-  matcher: ["/", "/clientes/:path*", "/barbeiros/:path*", "/planos/:path*", "/servicos/:path*", "/agendamentos/:path*", "/api/auth/callback/credentials"],
+  matcher: ["/", "/login", "/exemplos/:path*", "/clientes/:path*", "/barbeiros/:path*", "/planos/:path*", "/servicos/:path*", "/agendamentos/:path*", "/api/auth/callback/credentials"],
 }
 
 export async function proxy(request: NextRequest) {
-  const isAuthPath = request.nextUrl.pathname.startsWith("/api/auth")
+  const { pathname } = request.nextUrl
+  const isAuthPath = pathname.startsWith("/api/auth")
+  const isPublic = PUBLIC_ROUTES.some((route) => {
+    if (route.endsWith("/:path*")) {
+      return pathname.startsWith(route.replace("/:path*", ""))
+    }
+    return pathname === route
+  })
 
   if (isAuthPath) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
@@ -26,6 +35,8 @@ export async function proxy(request: NextRequest) {
 
     return NextResponse.next()
   }
+
+  if (isPublic) return NextResponse.next()
 
   const token = await getToken({
     req: request,

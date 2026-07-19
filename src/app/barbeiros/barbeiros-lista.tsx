@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 
-import type { BarbeiroData } from "@/app/barbearia/barbeiros/page"
+import type { BarbeiroData } from "@/app/meu-negocio/barbeiros/page"
 import {
   SearchIcon,
   ChevronDownIcon,

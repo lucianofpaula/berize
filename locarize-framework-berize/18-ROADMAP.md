@@ -1,6 +1,6 @@
 # Roadmap — Berize (CorteRize)
 
-> **Atualizado em:** 15/07/2026
+> **Atualizado em:** 16/07/2026
 > **Status:** Em desenvolvimento ativo (Fase 1 + parte da Fase 2)
 
 ---
@@ -120,13 +120,17 @@
 
 ### Website Builder
 
-- [ ] Landing page personalizável
-- [ ] Página de serviços
-- [ ] Página da equipe
-- [ ] Galeria de fotos
+- [x] Builder com split layout (preview + painel de edição)
+- [x] Seções: Hero, Sobre, Serviços, Equipe, Galeria, Depoimentos, Horários, Contato, Agendamento
+- [x] Reordenação drag-and-drop de seções
+- [x] Ativar/desativar seções individualmente
+- [x] Preview desktop e mobile
+- [x] Dados dinâmicos (serviços, barbeiros, horários do banco)
+- [x] API de salvar/carregar config
 - [ ] Agendamento online público
-- [ ] SEO otimizado
+- [ ] SEO otimizado (meta tags, sitemap)
 - [ ] Templates por segmento
+- [ ] Domínio personalizado
 
 ### Commerce Hub (E-commerce)
 
@@ -157,16 +161,52 @@
 
 - [ ] Perfil detalhado do cliente
 - [ ] Histórico completo de agendamentos e compras
-- [ ] Segmentação e campanhas
-- [ ] Programa de fidelidade (pontos, visitas)
+- [x] Segmentação e campanhas (ver módulo dedicado abaixo)
+- [x] Programa de fidelidade (Cartão Fidelidade com selos por visita)
+  - [x] Configuração (ativar, selos necessários, descrição da recompensa)
+  - [x] Acúmulo automático de selos ao concluir agendamento
+  - [x] Card de visão geral na página de campanhas
+  - [x] Contagem de clientes ativos e recompensas emitidas
 - [ ] Aniversariantes do mês
+
+### Módulo Campanhas (Marketing)
+
+- [x] CRUD completo de campanhas (criar, editar, listar, excluir)
+- [x] Formulário com preview em tempo real
+- [x] Seleção de estilo visual do card (Clássico, Gradiente, Premium, Minimalista, Destacado, Barra Lateral)
+- [x] Personalização de cores individuais por campo (título, subtítulo, descrição, destaque, badge, botão)
+- [x] Badge/Tag com cor de fundo e texto personalizáveis
+- [x] Customização de gradiente (cores inicial/final + direção)
+- [x] Customização de borda (ativa/desativa, espessura, cor)
+- [x] Animações do card (pulse, glow, shimmer, float)
+- [x] Geração de conteúdo por IA (Groq API)
+- [x] Sistema de cupons por campanha
+- [x] Tipo de resgate (único por cliente / recorrência)
+- [x] Período de vigência (data início/fim)
+- [x] Ativa/Inativa individual
+- [x] Listagem com busca, filtro por status, preview
+- [x] Popover de cores (seletores compactos com swatches + hex)
+- [x] Seções colapsáveis (Borda, Animação) para formulário mais limpo
+- [x] Rastreio de clientes adquiridos por campanha (atribuição via cupom)
+- [x] Badge de origem da campanha na listagem de clientes
+- [x] Card de métricas na edição da campanha (cupons emitidos, usados, clientes adquiridos)
+- [ ] Dashboard de desempenho da campanha (visualizações, cliques, resgates)
+- [ ] Agendamento de publicação (programar data/hora de ativação automática)
+- [ ] Templates de campanha pré-definidos
+- [ ] Segmentação por grupo de clientes (por plano, frequência, etc.)
+- [ ] Teste A/B entre dois estilos de card
+- [ ] QR Code único por campanha para rastreamento offline
+- [ ] Métricas por badge/tag (qual tag gera mais engajamento)
+- [ ] Gatilhos automáticos (aniversário do cliente, inatividade, pós-serviço)
+- [ ] Envio por WhatsApp integrado
+- [ ] Biblioteca de imagens/fotos para fundo do card
 
 ### Notificações
 
 - [ ] Lembrete de agendamento (WhatsApp)
 - [ ] Confirmação automática
 - [ ] Atraso / Não compareceu
-- [ ] Campanhas de marketing
+- [x] Campanhas de marketing (ver módulo dedicado acima)
 
 ### Check-in
 
@@ -241,3 +281,8 @@
 - **Agenda Online Pública:** Cliente agenda direto pelo site/instagram sem cadastro
 - **Integração Instagram/Facebook:** Importação de clientes, postagem automática
 - **Multi-unidade:** Gestão de múltiplas filiais em um só painel
+- **Campanhas Sazonais:** Calendário promocional com datas importantes (dia do barbeiro, black friday, etc.)
+- **Indicação com Recompensa:** Cliente indica um amigo e ganha desconto na próxima visita
+- **Cartão Fidelidade Digital:** Selos virtuais (ex: "corte a cada 10, ganhe 1 grátis") vinculado a campanhas
+- **Pesquisa de Satisfação Pós-Campanha:** Coleta automática de feedback após resgate
+- **Campanhas Geolocalizadas:** Notificação push para clientes próximos à barbearia
